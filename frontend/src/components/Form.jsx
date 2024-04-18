@@ -23,17 +23,37 @@ function Form({ route, method }) {
 
         try {
             const data = { username, password, role, fname, lname, email_id, password2 };
-            const res = await api.post(route, data);
+            let res;
             if (method === "login") {
+                // For login, post to the token endpoint
+                res = await api.post("/api/auth/token", { username, password });
                 localStorage.setItem(ACCESS_TOKEN, res.data.access);
                 localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-                if (res.data && res.data.role) {
-                    navigate(`/${res.data.role.toLowerCase().replace(' ', '')}`);
-                } else {
-                    // Handle the case where role is undefined
-                }
             } else {
+                // For register, post to the register endpoint
+                res = await api.post(route, data);
+                // Redirect to login page after successful registration
                 navigate("/login");
+            }
+
+            // If the response is successful, handle redirection based on role
+            if (res.status === 200 && method === "login") {
+                // Get user info after login to determine the role
+                const userInfo = await api.get("/api/user/profile/");
+                const role = userInfo.data.role;
+
+                if (role === "Normal User") {
+                    navigate("/normaluser");
+                } else if (role === "Surgeon") {
+                    navigate("/surgeon");
+                } else if (role === "Teleradiologist") {
+                    navigate("/teleradiologist");
+                } else if (role === "Radiologist") {
+                    navigate("/radiologist");
+                } else {
+                    // Handle other roles or unexpected scenarios
+                    navigate("/");
+                }
             }
         } catch (error) {
             alert(error);

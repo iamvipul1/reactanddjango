@@ -23,7 +23,7 @@ function ProtectedRoute({ children }) {
                 setIsAuthorized(false);
             }
         } catch (error) {
-            console.log(error);
+            console.error("Error refreshing token:", error);
             setIsAuthorized(false);
         }
     };
@@ -34,7 +34,10 @@ function ProtectedRoute({ children }) {
             setIsAuthorized(false);
             return;
         }
-        // Your authentication logic goes here
+
+        // You can add more authentication logic here if needed
+
+        setIsAuthorized(true);
     };
 
     if (isAuthorized === null) {
